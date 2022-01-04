@@ -1,19 +1,38 @@
 
 import React, { useState } from 'react';
 import {
+    Alert,
+    FlatList,
     Platform, StyleSheet, Text, TextInput, TouchableOpacity, View
 } from "react-native";
 import { Button } from '../../components/Button';
 import { SkillCard } from '../../components/SkillCard';
 
+type SkillProps = {
+    id: string;
+    skill: string;
+}
+
 
 export function Home() {
 
     const [skill, setSkill] = useState('')
-    const [skills, setSkills] = useState([''])
+    const [skills, setSkills] = useState<SkillProps[]>([])
 
     function handleNewSkill() {
-        setSkills([...skills, skill])
+
+        const newSkill = {
+            id: new Date().getTime().toString(),
+            skill: skill
+        }
+
+        setSkills([...skills, newSkill])
+    }
+
+
+    function handleRemoveSkill(skillId: string){
+        const removedSkill = skills.filter(skill => skill.id !== skillId)
+        setSkills(removedSkill)
     }
 
     return (
@@ -26,16 +45,24 @@ export function Home() {
                 onChangeText={setSkill}
             />
             <Button
-                label='ADD'
-                action={handleNewSkill}
+                label='Add'
+                onPress={handleNewSkill}
             />
             <Text style={[styles.title, { marginTop: 40 }]}>MySkills</Text>
-            {skills.map((skill, i) => (
-                <SkillCard
-                    key={i}
-                    content={skill}
+            <FlatList
+                data={skills}
+                keyboardShouldPersistTaps='always'
+                keyExtractor={item => item.id}
+                renderItem={({ item }) => (
+                    <SkillCard
+                    key={item.id}
+                    content={item.skill}
+                    onPress={() => handleRemoveSkill(item.id)}
                 />
-            )).slice(1, skills.length)}
+                )}
+                showsVerticalScrollIndicator={false}
+            />
+
         </View>
     )
 }
